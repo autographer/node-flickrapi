@@ -6,6 +6,7 @@
   "dependencies": {
     "async": "~0.2.10",
     "glob": "~3.2.6",
+    "https-proxy-agent": "^1.0.0",
     "open": "0.0.x",
     "progress": "1.1.4",
     "prompt": "0.2.x",
@@ -32,7 +33,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/Pomax/node-flickrapi.git"
+    "url": "https://github.com/autographer/node-flickrapi.git"
   },
   "scripts": {
     "test": "node test"
