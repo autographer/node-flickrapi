@@ -16,12 +16,12 @@
   callback argument: function(err, result)
 */
 
-module.exports = (function Flickr() {
+module.exports = function Flickr(opts) {
   "use strict";
 
   var fs = require("fs"),
       request = require("request"),
-      Utils = require("./utils"),
+      Utils = require("./utils")(opts),
       RequestTokenFunction = require("./auth/request");
 
   /**
@@ -157,4 +157,4 @@ module.exports = (function Flickr() {
     upload: Utils.upload.bind(Utils)
   };
 
-}());
+};

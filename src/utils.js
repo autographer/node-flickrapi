@@ -6,11 +6,12 @@
  *
  *  Response are in JSON format.
  */
-module.exports = (function() {
+module.exports = function(opts) {
   "use strict";
   var crypto = require("crypto"),
       fs = require("fs"),
       request = require("request"),
+      HttpsProxyAgent = require("https-proxy-agent"),
       statusCodes = {
         400: "Bad Request",
         401: "Unauthorized",
@@ -63,6 +64,8 @@ module.exports = (function() {
   }());
 
   var callErrors = {};
+  var proxy_host = opts.proxy_host || null;
+  var proxy_port = opts.proxy_port || null;
 
   return {
     /**
@@ -240,10 +243,8 @@ module.exports = (function() {
       return fn;
     },
 
-    /**
-     * Call the Flickr API
-     */
     queryFlickr: function(queryArguments, flickrOptions, security, processResult, errors) {
+
       queryArguments = JSON.parse(JSON.stringify(queryArguments));
 
       if(arguments.length === 3) {
@@ -278,7 +279,7 @@ module.exports = (function() {
           signature = authed ? "&oauth_signature=" + this.sign(data, flickrOptions.secret, flickrOptions.access_token_secret) : '',
           flickrURL = url + "?" + queryString + signature;
 
-      request.get(flickrURL, function(error, response, body) {
+      var flickrCb = function(error, response, body) {
 
         if(!response) {
           error = "HTTP Error: no response for url [" + flickrURL + "]";
@@ -309,7 +310,20 @@ module.exports = (function() {
         }
 
         processResult(false, body);
-      }.bind(this));
+
+      }.bind(this);
+
+      if(proxy_host && proxy_port) {
+        var agent = new HttpsProxyAgent({host:proxy_host, port:proxy_port});
+        request.get({
+          uri: flickrURL,
+          agent: agent,
+          followRedirect: true,
+          maxRedirects: 10,
+        }, flickrCb);
+      } else {
+        request.get(flickrURL, flickrCb);
+      }
     },
 
     /**
@@ -406,4 +420,4 @@ module.exports = (function() {
       });
     }
   };
-}());
+};
